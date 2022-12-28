@@ -1,7 +1,7 @@
 import 'package:mysql1/mysql1.dart';
 
 class MySql {
-  static String host = '127.0.0.1',
+  static String host = 'localhost',
       user = 'root',
       db = 'blood_donation_system',
       password = 'sanTaClause2002';
