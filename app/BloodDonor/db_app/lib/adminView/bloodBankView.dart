@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../sql/dbSql.dart';
 import '../models/bloodBank.dart';
+import 'package:pie_chart/pie_chart.dart';
 
 class BloodBankView extends StatefulWidget {
   BloodBank bloodbank;
@@ -15,6 +16,16 @@ class _BloodBankViewState extends State<BloodBankView> {
   late String name;
   late String address;
   late String contact;
+  Map<String, double> bloodData = {
+    'A+': 0,
+    'A-': 0,
+    'B+': 0,
+    'B-': 0,
+    'AB+': 0,
+    'AB-': 0,
+    'O+': 0,
+    'O-': 0
+  };
   var connection;
   final db = MySql();
   final nameController = TextEditingController();
@@ -22,13 +33,11 @@ class _BloodBankViewState extends State<BloodBankView> {
   final contactController = TextEditingController();
 
   void getConn() async {
-    name = widget.bloodbank.BloodBankName;
-    contact = widget.bloodbank.BloodBankContact;
-    address = widget.bloodbank.BloodBankAddress;
     var con = await db.getConnection();
     setState(() {
       connection = con;
     });
+    getBloodStock();
   }
 
   var isChanged;
@@ -57,6 +66,35 @@ class _BloodBankViewState extends State<BloodBankView> {
       widget.bloodbank.BloodBankName = nameController.text;
       widget.bloodbank.BloodBankAddress = addressController.text;
     });
+  }
+
+  void getBloodStock() async {
+    clearBloodData();
+    var results = await connection.query(
+        'select Aplus, Aminus, Oplus, Ominus, Bplus, Bminus, ABplus, ABminus from totalBloods where bloodBankId = ${widget.bloodbank.BloodBankId}');
+    setState(() {
+      for (var row in results) {
+        bloodData['A+'] = row[0];
+        bloodData['A-'] = row[1];
+        bloodData['O+'] = row[2];
+        bloodData['O-'] = row[3];
+        bloodData['B+'] = row[4];
+        bloodData['B-'] = row[5];
+        bloodData['AB+'] = row[6];
+        bloodData['AB-'] = row[7];
+      }
+    });
+  }
+
+  void clearBloodData() {
+    bloodData['A+'] = 0;
+    bloodData['A-'] = 0;
+    bloodData['O+'] = 0;
+    bloodData['O-'] = 0;
+    bloodData['B+'] = 0;
+    bloodData['B-'] = 0;
+    bloodData['AB+'] = 0;
+    bloodData['AB-'] = 0;
   }
 
   bool? updateBloodBank() {
@@ -199,7 +237,7 @@ class _BloodBankViewState extends State<BloodBankView> {
         ),
         body: Container(
           margin: const EdgeInsets.all(10),
-          height: MediaQuery.of(context).size.height * 0.4,
+          height: MediaQuery.of(context).size.height * 0.5,
           child: Card(
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -228,6 +266,9 @@ class _BloodBankViewState extends State<BloodBankView> {
                       ),
                     ],
                   ),
+                  Container(
+                      margin: const EdgeInsets.symmetric(vertical: 20),
+                      child: PieChart(dataMap: bloodData)),
                 ],
               ),
             ),

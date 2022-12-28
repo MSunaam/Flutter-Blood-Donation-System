@@ -54,7 +54,7 @@ class _IndividualPatientState extends State<IndividualPatient> {
   void sendData(
       String date, int quantityController, int bloodBank, int patient) async {
     connection.query(
-        'insert into BloodBankToPatient(DateRecieved, QuantityRecieved, BloodBankFK, PatientFK) values(\'${date}\', $quantityController, ${bloodBank}, ${patient})');
+        'insert into GiveToPatient(DateRecieved, QuantityRecieved, BloodBankid, Patientid) values(\'${date}\', $quantityController, ${bloodBank}, ${patient})');
   }
 
   void getBloodBanks() async {
@@ -244,15 +244,17 @@ class _IndividualPatientState extends State<IndividualPatient> {
           }));
         })).whenComplete(() {
       setState(() {
+        Future.delayed(const Duration(seconds: 2));
         getHistory();
       });
     });
   }
 
   void getHistory() async {
+    emptyResult = false;
     transfusionHistory.clear();
     var results = await connection.query(
-        'select BloodBankName, QuantityRecieved, DateRecieved, BloodBankFK, PatientFK from bloodbanktopatientview where PatientFK = ${widget.patient.id}');
+        'select BloodBankName, QuantityRecieved, DateRecieved,BloodBankId, PatientId from bloodbanktopatient where Patientid = ${widget.patient.id}');
     if (results.isEmpty) {
       setState(() {
         emptyResult = true;
@@ -300,69 +302,81 @@ class _IndividualPatientState extends State<IndividualPatient> {
           ),
           title: Text(widget.patient.name),
         ),
-        body: Container(
-          margin: const EdgeInsets.all(10),
-          height: MediaQuery.of(context).size.height * 0.9,
-          child: Column(
-            children: [
-              Card(
-                elevation: 10,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                child: Container(
-                  margin: const EdgeInsets.all(10),
-                  child: ListTile(
-                    title: Text(
-                      widget.patient.name,
-                      style: const TextStyle(fontSize: 20),
-                    ),
-                    leading: const Icon(
-                      Icons.account_circle_rounded,
-                      size: 50,
-                    ),
-                    subtitle: Text(widget.patient.disease),
-                    trailing: Text(widget.patient.bloodGroup,
-                        style: const TextStyle(fontSize: 18)),
-                  ),
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.all(10),
-                child: const Text(
-                  'Transfusion History',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-              ),
-              emptyResult
-                  ? Container(
-                      margin: const EdgeInsets.all(5),
-                      child: const Text(
-                        'No Results Found',
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w500),
+        body: RefreshIndicator(
+          onRefresh: () {
+            return Future.delayed(const Duration(seconds: 2), (() {
+              setState(() {
+                getHistory();
+              });
+            }));
+          },
+          child: SingleChildScrollView(
+            child: Container(
+              margin: const EdgeInsets.all(10),
+              height: MediaQuery.of(context).size.height * 0.9,
+              child: Column(
+                children: [
+                  Card(
+                    elevation: 10,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Container(
+                      margin: const EdgeInsets.all(10),
+                      child: ListTile(
+                        title: Text(
+                          widget.patient.name,
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                        leading: const Icon(
+                          Icons.account_circle_rounded,
+                          size: 50,
+                        ),
+                        subtitle: Text(widget.patient.disease),
+                        trailing: Text(widget.patient.bloodGroup,
+                            style: const TextStyle(fontSize: 18)),
                       ),
-                    )
-                  : ListView.builder(
-                      itemCount: transfusionHistory.length,
-                      shrinkWrap: true,
-                      itemBuilder: (context, index) {
-                        return Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          elevation: 10,
-                          child: ListTile(
-                            title:
-                                Text(transfusionHistory[index].blood_bank_name),
-                            subtitle: Text(
-                                '${transfusionHistory[index].QuantityRecieved.toString()} mL'),
-                            trailing: Text(
-                                '${transfusionHistory[index].DateRecieved.day}-${transfusionHistory[index].DateRecieved.month}-${transfusionHistory[index].DateRecieved.year}'),
-                          ),
-                        );
-                      },
                     ),
-            ],
+                  ),
+                  Container(
+                    margin: const EdgeInsets.all(10),
+                    child: const Text(
+                      'Transfusion History',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  emptyResult
+                      ? Container(
+                          margin: const EdgeInsets.all(5),
+                          child: const Text(
+                            'No Results Found',
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.w500),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: transfusionHistory.length,
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            return Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              elevation: 10,
+                              child: ListTile(
+                                title: Text(
+                                    transfusionHistory[index].blood_bank_name),
+                                subtitle: Text(
+                                    '${transfusionHistory[index].QuantityRecieved.toString()} mL'),
+                                trailing: Text(
+                                    '${transfusionHistory[index].DateRecieved.day}-${transfusionHistory[index].DateRecieved.month}-${transfusionHistory[index].DateRecieved.year}'),
+                              ),
+                            );
+                          },
+                        ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

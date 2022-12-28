@@ -29,8 +29,8 @@ class _LoginFormState extends State<LoginForm> {
     required void Function(bool, String, String) nextScreen,
   }) async {
     db.getConnection().then((conn) async {
-      var results =
-          await conn.query('select Username, Password from ${userType}Login');
+      var results = await conn.query(
+          'select Username, Password from adminLogin where username = \'${usernameController.text}\' and password = MD5(\'${passwordController.text}\')');
       if (results.isEmpty) {
         setState(() {
           inCorrectLogin = true;
@@ -141,31 +141,6 @@ class _LoginFormState extends State<LoginForm> {
                 return validatePassword(value!);
               }),
             ),
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ...login_types.map((data) {
-                return Flexible(
-                  child: Container(
-                    margin:
-                        const EdgeInsets.symmetric(vertical: 2, horizontal: 0),
-                    child: RadioListTile(
-                      title: Text(data),
-                      value: data,
-                      groupValue: selectedUser,
-                      onChanged: (value) {
-                        setState(() {
-                          selectedUser = value;
-                          inCorrectLogin = false;
-                          submitPressed = false;
-                        });
-                      },
-                    ),
-                  ),
-                );
-              }),
-            ],
           ),
           Container(
             margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 30),

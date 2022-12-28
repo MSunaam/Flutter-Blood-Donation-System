@@ -55,14 +55,15 @@ class _adminPageState extends State<adminPage> {
     bloodBanks.clear();
     db.getConnection().then((conn) async {
       var results = await conn.query(
-          'select BloodBankName, BloodBankAddress, BloodBankContact from BloodBank');
+          'select BloodBankName, BloodBankAddress, BloodBankContact, BloodBankId from BloodBank');
 
       setState(() {
         for (var row in results) {
           bloodBanks.add(BloodBank(
               BloodBankName: row[0],
               BloodBankAddress: row[1],
-              BloodBankContact: row[2]));
+              BloodBankContact: row[2],
+              BloodBankId: row[3]));
         }
       });
     });
