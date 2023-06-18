@@ -36,6 +36,7 @@ Before running the project, make sure you have the following prerequisites insta
 5. Import the database schema:
 
 - Open phpMyAdmin
+- Create a new database with the name ```blood_donation_system```
 - Import the MySQL script file from the root directory of the project.
 - This will create the necessary tables and structures in your database.
 
