@@ -11,7 +11,6 @@ To get started with this project, follow the instructions below.
 Before running the project, make sure you have the following prerequisites installed:
 
 - Flutter SDK: [Installation Guide](https://flutter.dev/docs/get-started/install)
-- Dart SDK: [Installation Guide](https://dart.dev/get-dart)
 - XAMPP server: [Download and Installation Guide](https://www.apachefriends.org/index.html)
 
 
